@@ -1,0 +1,91 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from PIL import Image
+from tkinter import Tk, filedialog
+
+# Fonction qui calcule les moyennes de blocs de pixels
+def reduire_matrice(matrice, taille):
+
+    hauteur, largeur, canaux = matrice.shape
+
+    nouvelle = np.zeros(
+        (hauteur // taille, largeur // taille, 3)
+    )
+
+    for i in range(0, hauteur, taille):
+        for j in range(0, largeur, taille):
+
+            bloc = matrice[i:i+taille, j:j+taille]
+
+            moyenne = np.mean(bloc, axis=(0, 1))
+
+            nouvelle[i//taille][j//taille] = moyenne
+
+    return nouvelle
+
+
+# Étape 1 : Choisir une photo
+fenetre = Tk()
+fenetre.withdraw()
+
+chemin = filedialog.askopenfilename(
+    title="Choisir une photo",
+    filetypes=[("Images", "*.jpg *.jpeg *.png")]
+)
+
+fenetre.destroy()
+# ETAPE X : Définir un nouveau 0
+"""
+faire une fontion def remise à 0 
+Elle doit lire la def prendre image et convertir en RGB
+définir le RGB de cette image comme nouveau maximum 
+Mettre ce RGB maximum la dans une liste
+Nommer l'élément comme l'échantillon
+
+"""
+if chemin:
+
+    # ETAPE 2 : Convertir la photo en matrice RGB
+    image = Image.open(chemin).convert("RGB")
+    image = image.resize((200, 200))
+
+    matrice = np.array(image, dtype=float)
+
+    # ETAPE 3 : Calculer les moyennes successives
+    matrice_50 = reduire_matrice(matrice, 4)
+    matrice_10 = reduire_matrice(matrice_50, 5)
+    matrice_1 = reduire_matrice(matrice_10, 10)
+
+    # ETAPE 4 : Obtenir la couleur RGB finale
+    r, g, b = np.rint(matrice_1[0][0]).astype(int)
+
+    print("Couleur moyenne de la photo :")
+    print("R =", r)
+    print("G =", g)
+    print("B =", b)
+    print(f"Code RGB : ({r}, {g}, {b})")
+
+    # ETAPE 5 : Afficher les résultats
+    fig, axes = plt.subplots(1, 4, figsize=(12, 4))
+
+    matrices = [matrice, matrice_50,
+                matrice_10, matrice_1]
+
+    titres = ["200x200", "50x50",
+              "10x10", "Couleur finale"]
+
+    for ax, m, titre in zip(axes, matrices, titres):
+        ax.imshow(np.rint(m).astype(np.uint8))
+        ax.set_title(titre)
+        ax.axis("off")
+
+    plt.tight_layout()
+    plt.show()
+
+else:
+    print("Aucune photo sélectionnée.")
+    
+
+    #faire que le programme definisse l'extrait pure comme nouveau 255 comme remise a 0 mettre image
+    #faire nv "0" pour chaque echantillon
+    #def remise a 0 avec liste pour chaque echantillon (par watt analysé par spectro) nommé par conditions dans la liste
